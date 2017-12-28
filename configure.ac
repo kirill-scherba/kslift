@@ -5,7 +5,7 @@ AC_PREREQ([2.69])
 AC_INIT(kslift, 0.0.1, [kirill@scherba.ru])
 AC_DEFINE([PACKAGE_DESCRIPTION], ["Lift test task by Kirill Scherba c++ application application"], [Application description])
 AC_DEFINE([PACKAGE_DEPENDENCIES], ["libteonet-dev"], [Application dependencies])
-AC_CONFIG_SRCDIR([src/main.c])
+AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CONFIG_HEADERS([src/config.h])
 
 m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])

@@ -34,6 +34,8 @@
  * Created on December 20, 2017, 9:52 AM
  */
 
+#include <iostream>
+
 #define APP_VERSION "0.0.1"
 
 /**
@@ -47,6 +49,8 @@
 int main(int argc, char** argv) {
 
   std::cout << "Lift test task by Kirill Scherba c++ application ver " APP_VERSION  "\n";
+  
+  // Check application parameters
 
   return (EXIT_SUCCESS);
 }
