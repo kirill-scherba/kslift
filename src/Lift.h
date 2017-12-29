@@ -13,12 +13,15 @@
 
 #pragma once
 
+#include <string>
+#include <sstream>
 #include <iostream>
 #include <cstdlib>
 #include <vector>
 #include <thread>
 #include <chrono>
-#include <set>
+
+#include "LiftButton.h"
 
 class Lift {
 
@@ -38,8 +41,10 @@ private:
   bool paused = false;
 
   // Buttons queue
-  std::set<int> iQueue;
-  std::set<int> oQueue;
+  //std::set<int> iQueue;
+  LiftButton iQueue;
+  //std::set<int> oQueue;
+  LiftButton oQueue;
 
   // Lift running flag
   bool running = true;
@@ -144,14 +149,14 @@ private:
       //std::cout << "\r[debug]Waited " << elapsed.count() << " ms\n";
       //prompt();
 
-      // Check buttons queues
-      if (iQueue.size()) {
-
-      }
-
-      if (oQueue.size()) {
-
-      }
+//      // Check buttons queues
+//      if (iQueue.size()) {
+//
+//      }
+//
+//      if (oQueue.size()) {
+//
+//      }
 
       // when the lift moves
       if(moves) {
@@ -163,10 +168,12 @@ private:
         // Check floor
         if (!((int)position % floor_height)) {
           int floor = getFloor(); // Calculate and show floor
-
-          // Stop moving
-          if(direction == UP and floor == floors_number) stopped(floor);
-          if(direction == DOWN and floor == 1) stopped(floor);
+          whatToDo(floor);
+//          // Stop moving at end and first floor
+//          if(moves) {
+//            if(direction == UP and floor == floors_number) stopped(floor);
+//            if(direction == DOWN and floor == 1) stopped(floor);
+//          }
         }
       }
     }
@@ -177,9 +184,12 @@ private:
    * Calculate current floor
    */
   int getFloor(bool show_message = true) {
-     int floor = ((int)position / floor_height) + 1;
-      if(show_message) std::cout << "\rFloor: " << floor << "\n";
-     return floor;
+    int floor = ((int)position / floor_height) + 1;
+     if(show_message) { 
+       std::cout << "\rFloor: " << floor << "\n";
+       prompt();
+     }
+    return floor;
   };
   
   /**
@@ -193,11 +203,8 @@ private:
     doorsOpen();
 
     // Remove this floor buttons from queues
-    auto it = iQueue.find(floor);
-    if(it != iQueue.end()) iQueue.erase(it);
-    
-    it = oQueue.find(floor);
-    if(it != oQueue.end()) oQueue.erase(it);
+    iQueue.erase(floor);
+    oQueue.erase(floor);
 
     // Get new job
     whatToDo(floor);
@@ -208,11 +215,12 @@ private:
    */
   void doorsOpen() {
     delay (BEFORE_OPEN_DOORS_TIME);
-    std::cout << "Doors is opened...\n";
+    std::cout << "\rDoors opening...\n";
     doors_opened = true;
     delay (opening_doors_time*1000);
     doors_opened = false;
-    std::cout << "Doors is closed...\n";
+    std::cout << "Doors closing...\n";
+    prompt();
     delay (BEFORE_OPEN_DOORS_TIME);
   }
 
@@ -223,48 +231,60 @@ private:
    */
   void whatToDo(int floor) {
     
-    std::cout << "What to do at " << floor << " floor? :-)\n";
+//    std::cout << "What to do at " << floor << " floor? :-)\n";
+//    prompt();
 
     // When moves on the floor
     if(moves) {
-      // ...
+      // Stop if floor in Queue
+      if(iQueue.find(floor)) {
+        iQueue.erase(floor);
+        doorsOpen();
+        moves = false;
+        whatToDo(floor);
+      }
     }
 
     // After doors is closed (or when lift was stopped at any floor and now button is pressed)
     else {
       // Check internal buttons first
       if(iQueue.size()) {
+        // Open doors if this floor button pressed
+        if(iQueue.find(floor)) {
+          iQueue.erase(floor);
+          doorsOpen();
+        }
         // Find floor upper than this and continue our way if so
-        if(direction == UP || direction == NONE) {
+        else if(direction == UP || direction == NONE) {
           // If we have internal buttons upper than this floor
-          auto it = iQueue.upper_bound(floor);
-          if(it != iQueue.end()) {
+          if(iQueue.hasUpper(floor)) {
             direction = UP;
-            moves = true;
-            std::cout << "Going Up...\n";
+//            moves = true;
+            std::cout << "\rGoing Up...\n";
           }
           // If we have internal buttons lower than this floor
           else { //if(iQueue.size()) {
             direction = DOWN;
-            moves = true;
-            std::cout << "Going Down...\n";
+//            moves = true;
+            std::cout << "\rGoing Down...\n";
           }
+          moves = true;
         }
         // Find floor lower than this and continue our way if so
         else if(direction == DOWN) {
           // If we have internal buttons upper than this floor
-          auto it = iQueue.lower_bound(floor);
-          if(it != iQueue.begin()) {
+          if(iQueue.hasLower(floor)) {
             direction = DOWN;
-            moves = true;
+//            moves = true;
             std::cout << "Going Down...\n";
           }
           // If we have internal buttons upper than this floor
           else { //if(iQueue.size()) {
             direction = UP;
-            moves = true;
+//            moves = true;
             std::cout << "Going Up...\n";
           }
+          moves = true;
         }
       }
       // Check outside buttons
@@ -287,11 +307,17 @@ private:
       std::cout << "\nHelp:\n\n" <<
         "Type a command and press Enter button.\n" <<
         "\n" <<
-        "Commands:\n\n" << 
-        "lift buttons:\n" <<
-        "  button should begin with letter: 'i' - internal(in lift) or 'o' - outside(in floor)\n" <<
-        "  f.e.: i1 - button 1 pressed inside lift, o2 - button pressed at second floor.\n" <<
+        "Commands:\n" << 
         "\n" <<
+        "'i'number or 'o'number - lift buttons:\n" <<
+        "\n" <<
+        "  button should begin with letter: 'i' - internal(in lift) or 'o' - outside(in floor)\n" <<
+        "  f.e.: i1 - button 1 pressed inside lift, o2 - button pressed at second floor,\n" <<
+        "  it is possible to enter comma delimited array of buttons : i2,i4,o4,o5\n" <<
+        "  or enter buttons in real time " <<
+        "  or enter 'p' command to pause lift and enter buttons offline\n" <<
+        "\n" <<
+        "'f' - show floor\n" <<
         "'p' - pause the lift and press buttons\n" <<
         "'i' - show list of internal buttons pressed\n" <<
         "'o' - show list of outside buttons pressed\n" <<
@@ -306,69 +332,81 @@ private:
 
       // Show prompt and get input
       prompt();
-      std::string button;
-      std::cin >> button;
-
-      // If help request
-      if (button == "?" || button == "help") help();
-
-      // If pause pressed
-      else if (button == "p") { 
-        if(!paused) std::cout << "paused... press 'p' to continue\n";
-        paused = !paused;
-      }  
-
-      // If list internal buttons request
-      else if (button == "i") {
-        std::cout << "List of internal buttons pressed:\n";
-        for(auto &i : iQueue) std::cout << i << "\n";
-      }  
+      std::string input;
+      std::cin >> input;
       
-      // If list outside buttons request
-      else if (button == "o") {
-        std::cout << "List of outside buttons pressed:\n";
-        for(auto &o : oQueue) std::cout << o << "\n";
-      }  
-      
-      // If quit request
-      else if (button == "q" || button == "quit") running = false;
+      std::string str;
+      std::stringstream stream(input);
+      while( std::getline(stream, str, ',') ) {
+              
+        std::cout << str << "\n";
 
-      // If wrong input
-      else if (button[0] != 'i' && button[0] != 'o') {
-        std::cout << "Wrong button. See Help: \n";
-        help();
-      }
+        // If help request
+        if (str == "?" || str == "help") help();
 
-      // Check buttons
-      else {
-        char type = button[0];
-        int value = std::atoi(button.substr(1).c_str());
+        // If pause pressed
+        else if (str == "p") { 
+          if(!paused) std::cout << "paused... press 'p' to continue\n";
+          paused = !paused;
+        }  
 
-        // Wrong input value
-        if (value <= 0) {
-          std::cout << "Wrong button pressed. See Help: \n";
+        // If list internal buttons request
+        else if (str == "f") {
+          std::cout << "Lift is on " << getFloor(false) << " floor\n";
+        }  
+
+        // If list internal buttons request
+        else if (str == "i") {
+          std::cout << "List of internal buttons pressed:\n";
+          iQueue.printList();
+        }  
+
+        // If list outside buttons request
+        else if (str == "o") {
+          std::cout << "List of outside buttons pressed:\n";
+          oQueue.printList();
+        }  
+
+        // If quit request
+        else if (str == "q" || str == "quit") running = false;
+
+        // If wrong input
+        else if (str[0] != 'i' && str[0] != 'o') {
+          std::cout << "Wrong button. See Help: \n";
           help();
         }
 
-        // Too hight floor
-        else if (value > floors_number) {
-          std::cout << "Too hight! :-) We have only " << floors_number << " floors\n";
-        }
-
-        // Valid button pressed
+        // Check buttons
         else {
-          if (type == 'i') {
-            std::cout << "Button " << value << " pressed inside the lift...\n";
-            iQueue.insert(value); // Add button to the Internal Buttons Set
-            if(!moves) whatToDo(getFloor(false));
+          char type = str[0];
+          int value = std::atoi(str.substr(1).c_str());
+
+          // Wrong input value
+          if (value <= 0) {
+            std::cout << "Wrong button pressed. See Help: \n";
+            help();
           }
+
+          // Too hight floor
+          else if (value > floors_number) {
+            std::cout << "Too hight! :-) We have only " << floors_number << " floors\n";
+          }
+
+          // Valid button pressed
           else {
-            std::cout << "Button pressed at the " << value << " floor...\n";
-            oQueue.insert(value); // Add button to the Outside Buttons Set
-            if(!moves) whatToDo(getFloor(false));
+            if (type == 'i') {
+              std::cout << "Button " << value << " pressed inside the lift...\n";
+              iQueue.insert(value); // Add button to the Internal Buttons Set            
+              if(!moves) whatToDo(getFloor(false));
+            }
+            else {
+              std::cout << "Button pressed at the " << value << " floor...\n";
+              oQueue.insert(value); // Add button to the Outside Buttons Set
+              if(!moves) whatToDo(getFloor(false));
+            }
           }
         }
-      }
+      }  
     }
   }
 

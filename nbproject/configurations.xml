@@ -4,6 +4,7 @@
     <df root="." name="0">
       <df name="src">
         <in>Lift.cpp</in>
+        <in>LiftButton.cpp</in>
         <in>main.cpp</in>
       </df>
     </df>
@@ -64,6 +65,8 @@
         </preBuild>
       </makefileType>
       <item path="src/Lift.cpp" ex="false" tool="1" flavor2="4">
+      </item>
+      <item path="src/LiftButton.cpp" ex="false" tool="1" flavor2="4">
       </item>
       <item path="src/main.cpp" ex="false" tool="1" flavor2="8">
         <ccTool flags="0">
