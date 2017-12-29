@@ -77,7 +77,7 @@ public:
   }
 
   /**
-   * Erase floor from queue
+   * Remove floor from queue
    *
    * @param floor
    * @return
@@ -107,7 +107,7 @@ public:
   /**
    * Print queue rows
    */
-  void printList() {
+  inline void printList() {
     for(auto &i : queue) std::cout << i << "\n";
   }
 

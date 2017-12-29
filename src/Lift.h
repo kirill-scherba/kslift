@@ -41,13 +41,12 @@ private:
   bool paused = false;
 
   // Buttons queue
-  //std::set<int> iQueue;
   LiftButton iQueue;
-  //std::set<int> oQueue;
   LiftButton oQueue;
 
   // Lift running flag
   bool running = true;
+  bool started = false;
 
   // Constants
   const int BEFORE_OPEN_DOORS_TIME = 1000; // Timeout before open and after close doors
@@ -85,8 +84,6 @@ public:
           break;
       }
     }
-
-    showArguments();
   }
 
   /**
@@ -108,7 +105,9 @@ public:
    * Start lift thread and get console commands
    */
   void start() {
-    std::thread t([this]() { lift(); }); // Lift thread
+    std::thread t([this]() { lift(); }); // Start lift thread
+    while(!started) delay(100); // Wait lift thread started
+    showArguments(); // Show lift parameters
     liftButtons(); // User Input (lift buttons)
     t.join(); // Wait thread finish
   }
@@ -120,21 +119,9 @@ private:
    */
   void lift() {
 
-    const int sleep_time = SLEEP_TIME; // time to sleep in milliseconds
+    const int sleep_time = SLEEP_TIME; // default time to sleep in milliseconds
     std::cout << "\rLift started...\n\n";
-    prompt();
-
-//    // Test: lift going up
-//    position = 0.00;
-//    moves = true;
-//    direction = UP;
-//
-//    // Test: lift going down
-//    position = 15.00;
-//    moves = true;
-//    direction = DOWN;
-
-    getFloor();
+    started = true;
 
     // Lift life cycle
     while(running) {
@@ -144,36 +131,24 @@ private:
       auto end = std::chrono::high_resolution_clock::now();
       std::chrono::duration<double, std::milli> elapsed = end-start;
       if(paused) continue;
-      
-      //std::cout << "\x1b[A" << "\r[debug]Waited " << elapsed.count() << " ms\n";
-      //std::cout << "\r[debug]Waited " << elapsed.count() << " ms\n";
-      //prompt();
-
-//      // Check buttons queues
-//      if (iQueue.size()) {
-//
-//      }
-//
-//      if (oQueue.size()) {
-//
-//      }
 
       // when the lift moves
       if(moves) {
         // Check lift position in meters
         float way = lift_speed * (elapsed.count() / 1000.0);
         position += direction == UP ? way : -way;
-        //std::cout << "\rPosition in meters: " << position << "\n";
 
         // Check floor
         if (!((int)position % floor_height)) {
           int floor = getFloor(); // Calculate and show floor
           whatToDo(floor);
-//          // Stop moving at end and first floor
-//          if(moves) {
-//            if(direction == UP and floor == floors_number) stopped(floor);
-//            if(direction == DOWN and floor == 1) stopped(floor);
-//          }
+          // Stop moving at end and first floor
+          // \TODO This happened at the beginning of development. May be this 
+          //       code does not need more 
+          //if(moves) {
+          //  if(direction == UP and floor == floors_number) stopped(floor);
+          //  if(direction == DOWN and floor == 1) stopped(floor);
+          //}
         }
       }
     }
@@ -220,7 +195,6 @@ private:
     delay (opening_doors_time*1000);
     doors_opened = false;
     std::cout << "Doors closing...\n";
-    prompt();
     delay (BEFORE_OPEN_DOORS_TIME);
   }
 
@@ -231,9 +205,6 @@ private:
    */
   void whatToDo(int floor) {
     
-//    std::cout << "What to do at " << floor << " floor? :-)\n";
-//    prompt();
-
     // When moves on the floor
     if(moves) {
       // Stop if floor in Queue
@@ -241,6 +212,7 @@ private:
         iQueue.erase(floor);
         doorsOpen();
         moves = false;
+        prompt();
         whatToDo(floor);
       }
     }
@@ -259,13 +231,11 @@ private:
           // If we have internal buttons upper than this floor
           if(iQueue.hasUpper(floor)) {
             direction = UP;
-//            moves = true;
             std::cout << "\rGoing Up...\n";
           }
           // If we have internal buttons lower than this floor
           else { //if(iQueue.size()) {
             direction = DOWN;
-//            moves = true;
             std::cout << "\rGoing Down...\n";
           }
           moves = true;
@@ -275,13 +245,11 @@ private:
           // If we have internal buttons upper than this floor
           if(iQueue.hasLower(floor)) {
             direction = DOWN;
-//            moves = true;
             std::cout << "Going Down...\n";
           }
           // If we have internal buttons upper than this floor
           else { //if(iQueue.size()) {
             direction = UP;
-//            moves = true;
             std::cout << "Going Up...\n";
           }
           moves = true;
@@ -313,14 +281,15 @@ private:
         "\n" <<
         "  button should begin with letter: 'i' - internal(in lift) or 'o' - outside(in floor)\n" <<
         "  f.e.: i1 - button 1 pressed inside lift, o2 - button pressed at second floor,\n" <<
-        "  it is possible to enter comma delimited array of buttons : i2,i4,o4,o5\n" <<
-        "  or enter buttons in real time " <<
+        "  it is possible to enter comma delimited array of buttons: i2,i4,o4,o5\n" <<
+        "  or enter buttons in real time\n" <<
         "  or enter 'p' command to pause lift and enter buttons offline\n" <<
         "\n" <<
         "'f' - show floor\n" <<
         "'p' - pause the lift and press buttons\n" <<
         "'i' - show list of internal buttons pressed\n" <<
         "'o' - show list of outside buttons pressed\n" <<
+        "'?' - show this help\n" << 
         "'q' - exit this application\n" <<
         "\n";
     };
@@ -423,14 +392,13 @@ private:
    * @return
    */
   void showArguments() {
-    std::cout << "\n" <<
+    std::cout << 
       "Lift parameters: " << "\n" <<
       "\n" <<
       "  Number of floors: " << floors_number << "\n" <<
       "  Height of one floor (m): " << floor_height << "\n" <<
       "  Speed of the elevator (m/sec): " << lift_speed << "\n" <<
-      "  Time of opening doors (sec): " << opening_doors_time << "\n"
-      << "\n";
+      "  Time of opening doors (sec): " << opening_doors_time << "\n";
   }
 
   /**
