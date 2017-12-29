@@ -1,7 +1,22 @@
+/* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 2; tab-width: 4 -*- */
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * kslift application
+ *
+ * Lift.h
+ * Copyright (C) Kirill Scherba 2017 <kirill@scherba.ru>
+ *
+ * kslift is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * kslift is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
@@ -118,6 +133,19 @@ private:
 
   /**
    * Lift thread function
+   * 
+   * Check lift speed parameter, calculate "time to the next floor" and start 
+   * loop while 'running' is true. 
+   * 
+   * During this loop function is sleeping for the "time to the next floor" and 
+   * than check 'paused' and 'moves' state. 
+   * 
+   * If lift is moves the lift position (in meters) is calculated to check if 
+   * the lift reached a floor. 
+   * 
+   * If lift is on floor the 'whatToDo' method is called to stop or continue 
+   * moving.
+   * 
    */
   void lift() {
 
@@ -138,7 +166,7 @@ private:
       std::chrono::duration<double, std::milli> elapsed = end-start;
       if(paused) continue;
 
-      // when the lift moves
+      // When the lift moves
       if(moves) {
         // Check lift position in meters
         float way = lift_speed * (elapsed.count() / 1000.0);
@@ -149,7 +177,7 @@ private:
           int floor = getFloor(); // Calculate and show floor
           whatToDo(floor);
           // Stop moving at end and first floor
-          // \TODO This happened at the beginning of development. May be this 
+          // \TODO This was happened at the beginning of development. May be this 
           //       code does not need more 
           //if(moves) {
           //  if(direction == UP and floor == floors_number) stopped(floor);
@@ -164,6 +192,10 @@ private:
 
   /**
    * Calculate current floor
+   * 
+   * @param show_message Show console message if true
+   * 
+   * @return Floor number
    */
   int getFloor(bool show_message = true) {
     int floor = ((int)position / floor_height) + 1;
@@ -177,7 +209,7 @@ private:
   /**
    * When lift stopped
    *
-   * @param floor
+   * @param floor Floor number
    */
   void stopped(int floor) {
     std::cout << "Lift is stopped at " << floor << " floor\n";
@@ -191,7 +223,8 @@ private:
   
   /**
    * Remove floor button from internal and outside queues
-   * @param floor
+   * 
+   * @param floor Floor number
    */
   inline void eraseButton(int floor) {
     iQueue.erase(floor);
@@ -199,7 +232,8 @@ private:
   }
 
   /**
-   * Doors open and then close after doors opening timeout
+   * Show messages "Doors opening" and then "Doors closing" after doors 
+   * opening timeout
    */
   void doorsOpen() {
     delay (BEFORE_OPEN_DOORS_TIME);
@@ -212,16 +246,17 @@ private:
   }
 
   /**
-   * What done after stop or on the floor
+   * What done after lift stopped or when it was stopped last time and now new 
+   * button is entered
    *
    * @param Current floor
    */
   void whatToDo(int floor) {
     
-    // When moves on the floor
+    // When moves at the floor
     if(moves) {
-      // Stop if floor in Queue
-      if(iQueue.find(floor) || 
+      // Stop if floor is in Button Queues
+      if(iQueue.find(floor) ||   
         (oQueue.find(floor) && (direction == DOWN || !iQueue.size()))) {
         eraseButton(floor);
         moves = false;
@@ -233,7 +268,7 @@ private:
       }
     }
 
-    // After doors is closed (or when lift was stopped at any floor and now button is pressed)
+    // After doors is closed or when lift was stopped at any floor and now button is pressed
     else {
       
       /**
@@ -277,18 +312,14 @@ private:
       };
       
       // Check internal buttons first
-      if(iQueue.size()) {
-        getDirection(iQueue, floor);
-      }
+      if(iQueue.size()) getDirection(iQueue, floor);
       // Check outside buttons
-      else if(oQueue.size()) {
-        getDirection(oQueue, floor);
-      }
+      else if(oQueue.size()) getDirection(oQueue, floor);
     }
   }
 
   /**
-   * Wait floor buttons input
+   * Wait for floor buttons input
    */
   void liftButtons() {
 
@@ -328,6 +359,7 @@ private:
       std::string input;
       std::cin >> input;
       
+      // Divide input string by comma and process substring
       std::string str;
       std::stringstream stream(input);
       while( std::getline(stream, str, ',') ) {
@@ -343,7 +375,7 @@ private:
           paused = !paused;
         }  
 
-        // If list internal buttons request
+        // If show floor request
         else if (str == "f") {
           std::cout << "Lift is on " << getFloor(false) << " floor\n";
         }  

@@ -1,7 +1,22 @@
+/* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 2; tab-width: 4 -*- */
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * kslift application
+ *
+ * LiftButton.h
+ * Copyright (C) Kirill Scherba 2017 <kirill@scherba.ru>
+ *
+ * kslift is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * kslift is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
@@ -34,17 +49,16 @@ public:
   /**
    * Insert value to queue
    *
-   * @param value
-   * @return
+   * @param floor Floor number
    */
-  inline void insert(int value) {
-    queue.insert(value);
+  inline void insert(int floor) {
+    queue.insert(floor);
   }
 
   /**
-   * Return queue size
+   * Return buttons queue size
    *
-   * @return
+   * @return Buttons queue size
    */
   inline size_t size() {
     return queue.size();
@@ -53,8 +67,9 @@ public:
   /**
    * If button upper than input floor is present in the queue 
    * 
-   * @param floor
-   * @return 
+   * @param floor Floor number
+   * 
+   * @return True if floor upper than selected in input parameter is present
    */
   bool hasUpper(int floor) {
     bool retval = false;
@@ -66,8 +81,9 @@ public:
   /**
    * If button lower than input floor is present in the queue
    * 
-   * @param floor
-   * @return 
+   * @param floor Floor number
+   * 
+   * @return True if floor lower than selected in input parameter is present
    */
   bool hasLower(int floor) {
     bool retval = false;
@@ -79,8 +95,9 @@ public:
   /**
    * Remove floor from queue
    *
-   * @param floor
-   * @return
+   * @param floor Floor number
+   * 
+   * @return True if floor was present in Queue and removed
    */
   bool erase(int floor) {
     bool retval = false;
@@ -94,8 +111,9 @@ public:
   /**
    * Find floor in queue
    * 
-   * @param floor
-   * @return 
+   * @param floor Floor number
+   * 
+   * @return True if floor present in Queue 
    */
   bool find(int floor) {
     bool retval = false;
@@ -105,7 +123,7 @@ public:
   }
 
   /**
-   * Print queue rows
+   * Print buttons queue rows
    */
   inline void printList() {
     for(auto &i : queue) std::cout << i << "\n";

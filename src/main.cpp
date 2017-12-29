@@ -3,7 +3,7 @@
  * kslift application
  *
  * main.cpp
- * Copyright (C) Kirill Scherba 2011-2017 <kirill@scherba.ru>
+ * Copyright (C) Kirill Scherba 2017 <kirill@scherba.ru>
  *
  * kslift is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
