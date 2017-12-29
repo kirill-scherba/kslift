@@ -30,7 +30,7 @@ private:
   // Lift parameters
   int floors_number = 5; // Number of floors (5-20)
   int floor_height = 3; // One floor height in meters
-  int lift_speed = 1; // Speed of lift in meters/sec
+  int lift_speed = 3; // Speed of lift in meters/sec
   int opening_doors_time = 3; // Opening and closing time in sec
 
   // Lift state
@@ -221,7 +221,8 @@ private:
     // When moves on the floor
     if(moves) {
       // Stop if floor in Queue
-      if(iQueue.find(floor)) {
+      if(iQueue.find(floor) || 
+        (oQueue.find(floor) && (direction == DOWN || !iQueue.size()))) {
         eraseButton(floor);
         moves = false;
         doorsOpen();
@@ -234,17 +235,21 @@ private:
 
     // After doors is closed (or when lift was stopped at any floor and now button is pressed)
     else {
-      // Check internal buttons first
-      if(iQueue.size()) {
+      
+      /**
+       * Check LiftButton queue and get lift direction
+       * @param floor
+       */
+      auto getDirection = [this](LiftButton &queue, int floor) {
         // Open doors if this floor button pressed
-        if(iQueue.find(floor)) {
+        if(queue.find(floor)) {
           eraseButton(floor);
           doorsOpen();
         }
         // Find floor upper than this and continue our way if so
         else if(direction == UP || direction == NONE) {
           // If we have internal buttons upper than this floor
-          if(iQueue.hasUpper(floor)) {
+          if(queue.hasUpper(floor)) {
             direction = UP;
             std::cout << "\rGoing Up...\n";
           }
@@ -258,7 +263,7 @@ private:
         // Find floor lower than this and continue our way if so
         else if(direction == DOWN) {
           // If we have internal buttons upper than this floor
-          if(iQueue.hasLower(floor)) {
+          if(queue.hasLower(floor)) {
             direction = DOWN;
             std::cout << "Going Down...\n";
           }
@@ -269,12 +274,16 @@ private:
           }
           moves = true;
         }
+      };
+      
+      // Check internal buttons first
+      if(iQueue.size()) {
+        getDirection(iQueue, floor);
       }
       // Check outside buttons
       else if(oQueue.size()) {
-        // \TODO Check outside buttons
+        getDirection(oQueue, floor);
       }
-
     }
   }
 

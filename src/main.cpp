@@ -53,7 +53,11 @@ int main(int argc, char** argv) {
 
   std::cout << "Lift test task by Kirill Scherba c++ application ver " APP_VERSION  "\n";
   
-  const char *usage = "Usage: kslift [OPTIONS] <number_of_floors(5-20)> [height_of_one_floor(m) = 3] [elevator_speed(m/sec) = 1] [time_of_opening_doors(sec) = 3]";
+  const char *usage = "Usage: kslift "
+                      "<number_of_floors(5-20)> "
+                      "[height_of_one_floor(m) = 3] "
+                      "[lift_speed(m/sec) = 3] "
+                      "[time_of_opening_doors(sec) = 3]";
   
   // Check application parameters
   if (argc < 2) {
