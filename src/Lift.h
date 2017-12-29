@@ -107,8 +107,10 @@ public:
   void start() {
     std::thread t([this]() { lift(); }); // Start lift thread
     while(!started) delay(100); // Wait lift thread started
-    showArguments(); // Show lift parameters
-    liftButtons(); // User Input (lift buttons)
+    if(running) {
+      showArguments(); // Show lift parameters
+      liftButtons(); // User Input (lift buttons)
+    }
     t.join(); // Wait thread finish
   }
 
@@ -119,8 +121,12 @@ private:
    */
   void lift() {
 
-    const int sleep_time = SLEEP_TIME; // default time to sleep in milliseconds
-    std::cout << "\rLift started...\n\n";
+    const int sleep_time = 1000 * floor_height / lift_speed;  // sleep in milliseconds between floors     
+    std::cout << "\rLift started (time to the next floor: " << sleep_time <<  " ms)...\n\n";
+    if(sleep_time < 5) {
+      std::cout << "Too hight lift speed. Pleas use lower value.\n";
+      running = false;
+    }
     started = true;
 
     // Lift life cycle
@@ -152,6 +158,7 @@ private:
         }
       }
     }
+    
     std::cout << "\nLift stopped\n\n";
   }
 
@@ -390,7 +397,7 @@ private:
   /**
    * Show prompt
    */
-  void prompt() {
+  inline void prompt() {
     std::cout << "lift > " << std::flush;;
   };
 
@@ -399,13 +406,13 @@ private:
    *
    * @return
    */
-  void showArguments() {
+  inline void showArguments() {
     std::cout << 
       "Lift parameters: " << "\n" <<
       "\n" <<
       "  Number of floors: " << floors_number << "\n" <<
       "  Height of one floor (m): " << floor_height << "\n" <<
-      "  Speed of the elevator (m/sec): " << lift_speed << "\n" <<
+      "  Speed of the lift (m/sec): " << lift_speed << "\n" <<
       "  Time of opening doors (sec): " << opening_doors_time << "\n";
   }
 
@@ -413,7 +420,7 @@ private:
    * Delay (just delay...)
    * @param sleep_time Time of delay in milliseconds
    */
-  void delay (int sleep_time) {
+  inline void delay (int sleep_time) {
     std::this_thread::sleep_for((std::chrono::milliseconds) sleep_time);
   }
 };
