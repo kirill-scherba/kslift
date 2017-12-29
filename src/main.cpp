@@ -35,6 +35,9 @@
  */
 
 #include <iostream>
+#include <vector>
+
+#include "Lift.h"
 
 #define APP_VERSION "0.0.1"
 
@@ -50,7 +53,23 @@ int main(int argc, char** argv) {
 
   std::cout << "Lift test task by Kirill Scherba c++ application ver " APP_VERSION  "\n";
   
+  const char *usage = "Usage: kslift [OPTIONS] <number_of_floors(5-20)> [height_of_one_floor(m) = 3] [elevator_speed(m/sec) = 1] [time_of_opening_doors(sec) = 3]";
+  
   // Check application parameters
-
+  if (argc < 2) {
+    std::cout << "\nInvalid number of application arguments.\n\n";
+    std::cout << usage << "\n\n";
+  }
+  else if (std::atoi(argv[1]) < 5 || std::atoi(argv[1]) > 20) {
+    std::cout << "\nWrong number of floors. This value should be from 5 to 20." << "\n\n";
+    std::cout << usage << "\n";
+  }
+  // Create lift object
+  else {
+    std::vector<std::string> arguments(argv + 1, argv + argc);  
+    auto lift = Lift(arguments);
+    lift.start();
+  }
+  
   return (EXIT_SUCCESS);
 }

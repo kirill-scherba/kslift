@@ -41,7 +41,7 @@ else
   AM_CXXFLAGS += -O2
 endif
 
-LIBS =
+LIBS = -pthread
 
 bin_PROGRAMS = kslift
 
