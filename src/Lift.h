@@ -173,16 +173,22 @@ private:
    * @param floor
    */
   void stopped(int floor) {
-    moves = false;
     std::cout << "Lift is stopped at " << floor << " floor\n";
+    eraseButton(floor);
+    moves = false;
     doorsOpen();
-
-    // Remove this floor buttons from queues
-    iQueue.erase(floor);
-    oQueue.erase(floor);
 
     // Get new job
     whatToDo(floor);
+  }
+  
+  /**
+   * Remove floor button from internal and outside queues
+   * @param floor
+   */
+  inline void eraseButton(int floor) {
+    iQueue.erase(floor);
+    oQueue.erase(floor);
   }
 
   /**
@@ -209,10 +215,12 @@ private:
     if(moves) {
       // Stop if floor in Queue
       if(iQueue.find(floor)) {
-        iQueue.erase(floor);
-        doorsOpen();
+        eraseButton(floor);
         moves = false;
+        doorsOpen();
         prompt();
+        
+        // Get new job        
         whatToDo(floor);
       }
     }
@@ -223,7 +231,7 @@ private:
       if(iQueue.size()) {
         // Open doors if this floor button pressed
         if(iQueue.find(floor)) {
-          iQueue.erase(floor);
+          eraseButton(floor);
           doorsOpen();
         }
         // Find floor upper than this and continue our way if so
