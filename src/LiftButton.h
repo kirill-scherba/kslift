@@ -29,12 +29,14 @@
 #pragma once
 
 #include <set>
+#include <mutex>
 
 class LiftButton {
 
 private:
 
   std::set<int> queue;
+  std::mutex queue_mutex;
 
 public:
 
@@ -52,6 +54,7 @@ public:
    * @param floor Floor number
    */
   inline void insert(int floor) {
+    std::lock_guard<std::mutex> lock(queue_mutex); // lock tread
     queue.insert(floor);
   }
 
@@ -72,6 +75,7 @@ public:
    * @return True if floor upper than selected in input parameter is present
    */
   bool hasUpper(int floor) {
+    std::lock_guard<std::mutex> lock(queue_mutex); // lock thread
     bool retval = false;
     auto it = queue.upper_bound(floor);
     if(it != queue.end()) retval = true;
@@ -86,6 +90,7 @@ public:
    * @return True if floor lower than selected in input parameter is present
    */
   bool hasLower(int floor) {
+    std::lock_guard<std::mutex> lock(queue_mutex); // lock tread
     bool retval = false;
     auto it = queue.lower_bound(floor);
     if(it != queue.begin()) retval = true;
@@ -100,8 +105,9 @@ public:
    * @return True if floor was present in Queue and removed
    */
   bool erase(int floor) {
+    std::lock_guard<std::mutex> lock(queue_mutex); // lock tread
     bool retval = false;
-    if(find(floor)) {
+    if(find(floor, false)) {
       queue.erase(floor);
       retval = true;
     }
@@ -115,7 +121,8 @@ public:
    * 
    * @return True if floor present in Queue 
    */
-  bool find(int floor) {
+  bool find(int floor, bool lock = true) {
+    if(lock) std::lock_guard<std::mutex> lock(queue_mutex); // lock tread
     bool retval = false;
     auto it = queue.find(floor);
     if(it != queue.end()) retval = true;
