@@ -35,6 +35,7 @@ private:
   bool moves = false;
   int direction = NONE;
   bool doors_opened = false;
+  bool paused = false;
 
   // Buttons queue
   std::set<int> iQueue;
@@ -137,6 +138,8 @@ private:
       delay (sleep_time);
       auto end = std::chrono::high_resolution_clock::now();
       std::chrono::duration<double, std::milli> elapsed = end-start;
+      if(paused) continue;
+      
       //std::cout << "\x1b[A" << "\r[debug]Waited " << elapsed.count() << " ms\n";
       //std::cout << "\r[debug]Waited " << elapsed.count() << " ms\n";
       //prompt();
@@ -281,10 +284,18 @@ private:
      * Input buttons help message
      */
     auto help = []() {
-      std::cout << "\nHelp:\n\nPress lift buttons.\n" <<
-        "Button should begin from letter: 'i' - internal(in lift) or 'o' - outside(in floor).\n" <<
-        "F.e.: i1 - button 1 pressed inside lift, o2 - button pressed at second floor.\n" <<
-        "Press 'q' to exit this application\n" <<
+      std::cout << "\nHelp:\n\n" <<
+        "Type a command and press Enter button.\n" <<
+        "\n" <<
+        "Commands:\n\n" << 
+        "lift buttons:\n" <<
+        "  button should begin with letter: 'i' - internal(in lift) or 'o' - outside(in floor)\n" <<
+        "  f.e.: i1 - button 1 pressed inside lift, o2 - button pressed at second floor.\n" <<
+        "\n" <<
+        "'p' - pause the lift and press buttons\n" <<
+        "'i' - show list of internal buttons pressed\n" <<
+        "'o' - show list of outside buttons pressed\n" <<
+        "'q' - exit this application\n" <<
         "\n";
     };
 
@@ -301,6 +312,24 @@ private:
       // If help request
       if (button == "?" || button == "help") help();
 
+      // If pause pressed
+      else if (button == "p") { 
+        if(!paused) std::cout << "paused... press 'p' to continue\n";
+        paused = !paused;
+      }  
+
+      // If list internal buttons request
+      else if (button == "i") {
+        std::cout << "List of internal buttons pressed:\n";
+        for(auto &i : iQueue) std::cout << i << "\n";
+      }  
+      
+      // If list outside buttons request
+      else if (button == "o") {
+        std::cout << "List of outside buttons pressed:\n";
+        for(auto &o : oQueue) std::cout << o << "\n";
+      }  
+      
       // If quit request
       else if (button == "q" || button == "quit") running = false;
 
