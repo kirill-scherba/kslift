@@ -125,7 +125,7 @@ public:
     while(!started) delay(100); // Wait lift thread started
     if(running) {
       showArguments(); // Show lift parameters
-      liftButtons(); // User Input (lift buttons)
+      consoleInput();  // User Input (lift buttons and helpers command)
     }
     t.join(); // Wait thread finish
   }
@@ -327,7 +327,7 @@ private:
   /**
    * Wait for floor buttons input
    */
-  void liftButtons() {
+  void consoleInput() {
 
     /**
      * Input buttons help message
