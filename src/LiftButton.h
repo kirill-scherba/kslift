@@ -26,7 +26,8 @@
  * Created on December 29, 2017, 7:31 PM
  */
 
-#pragma once
+#ifndef LIFTBUTTON_H
+#define LIFTBUTTON_H
 
 #include <set>
 #include <mutex>
@@ -139,3 +140,5 @@ public:
 private:
 
 };
+
+#endif /* LIFTBUTTON_H */

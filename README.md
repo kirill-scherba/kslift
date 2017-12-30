@@ -33,7 +33,7 @@
 Желаем успехов!
 
 
-## 2. Generate your application sources (first time when got sources from repository)
+## 2. Generate this application sources (first time when got sources from repository)
 
     ./autogen.sh
 
@@ -44,5 +44,5 @@
 
 ## 4. Run 
     
-    src/kslift kslift
+    src/kslift
 

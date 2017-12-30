@@ -26,7 +26,8 @@
  * Created on December 28, 2017, 11:07 PM
  */
 
-#pragma once
+#ifndef LIFT_H
+#define LIFT_H
 
 #include <string>
 #include <sstream>
@@ -465,3 +466,5 @@ private:
     std::this_thread::sleep_for((std::chrono::milliseconds) sleep_time);
   }
 };
+
+#endif /* LIFT_H */
