@@ -72,15 +72,6 @@ private:
 
 public:
 
-  //  Lift(int number_of_floors, int height_of_one_floor = 3,
-  //       int speed_of_the_elevator = 1,  int time_opening_doors = 3) :
-  //       floors_number(number_of_floors),
-  //       floor_height(height_of_one_floor),
-  //       elevator_speed(speed_of_the_elevator),
-  //       opening_doors_time(time_opening_doors) {
-  //
-  //  }
-
   /**
    * Lift Class constructor
    * @param arguments Vector with lift parameters
@@ -176,14 +167,7 @@ private:
         // Check floor
         if (!((int)position % floor_height)) {
           int floor = getFloor(); // Calculate and show floor
-          whatToDo(floor);
-          // Stop moving at end and first floor
-          // \TODO This was happened at the beginning of development. May be this 
-          //       code does not need more 
-          //if(moves) {
-          //  if(direction == UP and floor == floors_number) stopped(floor);
-          //  if(direction == DOWN and floor == 1) stopped(floor);
-          //}
+          whatToDo(floor); // Get new job
         }
       }
     }
