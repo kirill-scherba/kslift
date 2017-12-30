@@ -214,7 +214,7 @@ private:
    */
   void stopped(int floor) {
     std::cout << "Lift is stopped at " << floor << " floor\n";
-    eraseButton(floor);
+    eraseButtons(floor);
     moves = false;
     doorsOpen();
 
@@ -227,7 +227,7 @@ private:
    * 
    * @param floor Floor number
    */
-  inline void eraseButton(int floor) {
+  inline void eraseButtons(int floor) {
     iQueue.erase(floor);
     oQueue.erase(floor);
   }
@@ -258,8 +258,12 @@ private:
     if(moves) {
       // Stop if floor is in Button Queues
       if(iQueue.find(floor) ||   
-        (oQueue.find(floor) && (direction == DOWN || !iQueue.size()))) {
-        eraseButton(floor);
+        (oQueue.find(floor) && (direction == DOWN || 
+                                !iQueue.size() ||
+                                !iQueue.hasUpper(floor)
+        ))) {
+        
+        eraseButtons(floor); 
         moves = false;
         doorsOpen();
         prompt();
@@ -273,41 +277,40 @@ private:
     else {
       
       /**
-       * Check LiftButton queue and get lift direction
-       * @param floor
+       * Set direction and show message
+       * @param lift_direction Lift direction
        */
-      auto getDirection = [this](LiftButton &queue, int floor) {
+      auto going = [this](int lift_direction) {
+        direction = lift_direction;
+        if(lift_direction == UP) std::cout << "\rGoing Up...\n";
+        else std::cout << "\rGoing Down...\n";
+      };
+      
+      /**
+       * Check LiftButton queue and get lift direction
+       * @param queue Lift buttons queue
+       * @param floor Floor number
+       */
+      auto getDirection = [this, going](LiftButton &queue, int floor) {
         // Open doors if this floor button pressed
         if(queue.find(floor)) {
-          eraseButton(floor);
+          eraseButtons(floor);
           doorsOpen();
         }
         // Find floor upper than this and continue our way if so
         else if(direction == UP || direction == NONE) {
           // If we have internal buttons upper than this floor
-          if(queue.hasUpper(floor)) {
-            direction = UP;
-            std::cout << "\rGoing Up...\n";
-          }
+          if(queue.hasUpper(floor)) going(UP);
           // If we have internal buttons lower than this floor
-          else { //if(iQueue.size()) {
-            direction = DOWN;
-            std::cout << "\rGoing Down...\n";
-          }
+          else going(DOWN);
           moves = true;
         }
         // Find floor lower than this and continue our way if so
         else if(direction == DOWN) {
           // If we have internal buttons upper than this floor
-          if(queue.hasLower(floor)) {
-            direction = DOWN;
-            std::cout << "Going Down...\n";
-          }
+          if(queue.hasLower(floor)) going(DOWN);
           // If we have internal buttons upper than this floor
-          else { //if(iQueue.size()) {
-            direction = UP;
-            std::cout << "Going Up...\n";
-          }
+          else going(UP);
           moves = true;
         }
       };
