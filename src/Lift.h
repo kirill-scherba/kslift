@@ -254,13 +254,14 @@ private:
    */
   void whatToDo(int floor) {
     
-    // When moves at the floor
+    // When moves on the floor
     if(moves) {
-      // Stop if floor is in Button Queues
-      if(iQueue.find(floor) ||   
-        (oQueue.find(floor) && (direction == DOWN || 
-                                !iQueue.size() ||
-                                !iQueue.hasUpper(floor)
+      // Stop if floor button was pressed
+      if(iQueue.find(floor) ||    // if internal button pressed   
+        (oQueue.find(floor) &&    // if outside button pressed and
+          (direction == DOWN ||   //   direction is down
+          !iQueue.size() ||       //   no one internal button is pressed
+          !iQueue.hasUpper(floor) //   no internal buttons upper then this floor
         ))) {
         
         eraseButtons(floor); 
@@ -273,7 +274,8 @@ private:
       }
     }
 
-    // After doors is closed or when lift was stopped at any floor and now button is pressed
+    // After doors is closed or when lift was stopped before and now button 
+    // is pressed
     else {
       
       /**
@@ -307,7 +309,7 @@ private:
         }
         // Find floor lower than this and continue our way if so
         else if(direction == DOWN) {
-          // If we have internal buttons upper than this floor
+          // If we have internal buttons lower than this floor
           if(queue.hasLower(floor)) going(DOWN);
           // If we have internal buttons upper than this floor
           else going(UP);

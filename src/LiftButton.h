@@ -55,7 +55,7 @@ public:
    * @param floor Floor number
    */
   inline void insert(int floor) {
-    std::lock_guard<std::mutex> lock(queue_mutex); // lock tread
+    std::lock_guard<std::mutex> lock(queue_mutex); // lock thread
     queue.insert(floor);
   }
 
@@ -91,7 +91,7 @@ public:
    * @return True if floor lower than selected in input parameter is present
    */
   bool hasLower(int floor) {
-    std::lock_guard<std::mutex> lock(queue_mutex); // lock tread
+    std::lock_guard<std::mutex> lock(queue_mutex); // lock thread
     bool retval = false;
     auto it = queue.lower_bound(floor);
     if(it != queue.begin()) retval = true;
@@ -106,7 +106,7 @@ public:
    * @return True if floor was present in Queue and removed
    */
   bool erase(int floor) {
-    std::lock_guard<std::mutex> lock(queue_mutex); // lock tread
+    std::lock_guard<std::mutex> lock(queue_mutex); // lock thread
     bool retval = false;
     if(find(floor, false)) {
       queue.erase(floor);
@@ -123,7 +123,7 @@ public:
    * @return True if floor present in Queue 
    */
   bool find(int floor, bool lock = true) {
-    if(lock) std::lock_guard<std::mutex> lock(queue_mutex); // lock tread
+    if(lock) std::lock_guard<std::mutex> lock(queue_mutex); // lock thread
     bool retval = false;
     auto it = queue.find(floor);
     if(it != queue.end()) retval = true;
