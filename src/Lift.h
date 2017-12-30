@@ -208,21 +208,6 @@ private:
   };
   
   /**
-   * When lift stopped
-   *
-   * @param floor Floor number
-   */
-  void stopped(int floor) {
-    std::cout << "Lift is stopped at " << floor << " floor\n";
-    eraseButtons(floor);
-    moves = false;
-    doorsOpen();
-
-    // Get new job
-    whatToDo(floor);
-  }
-  
-  /**
    * Remove floor button from internal and outside queues
    * 
    * @param floor Floor number
